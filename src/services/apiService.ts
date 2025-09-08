@@ -103,7 +103,9 @@ export const enviarInformacoesAPI = async (
     informacoes: {
         informacao: string; 
         descricao: string;  
-        data: string;       
+        data: string;
+        localizacao?: string;
+        telefone?: string;
         files?: File[];     
     }
 ): Promise<void> => {
@@ -113,6 +115,13 @@ export const enviarInformacoesAPI = async (
         params.append('descricao', informacoes.descricao);
         params.append('data', informacoes.data);
         params.append('ocoId', ocoId.toString());
+        
+        if (informacoes.localizacao) {
+            params.append('localizacao', informacoes.localizacao);
+        }
+        if (informacoes.telefone) {
+            params.append('telefone', informacoes.telefone);
+        }
 
         let formData: FormData | null = null;
         

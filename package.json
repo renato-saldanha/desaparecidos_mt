@@ -6,24 +6,29 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "docker:dev": "docker-compose up app"
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "type-check": "tsc --noEmit",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:dev": "docker compose up app",
+    "docker:clean": "docker compose down -v --rmi all",
+    "docker:restart": "docker compose restart",
+    "docker:status": "docker compose ps"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
     "axios": "^1.11.0",
     "next": "15.5.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.3.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

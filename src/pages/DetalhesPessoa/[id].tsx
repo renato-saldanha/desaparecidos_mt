@@ -7,6 +7,7 @@ import { OcorrenciaInformacaoDTO, PessoaDTO } from '@/interfaces';
 import { pessoaLocalizada } from '@/utils/pessoaUtils';
 import CustomInput from '@/Components/CustomInput';
 import CustomButton from '@/Components/CustomButton';
+import MaskedInput from '@/Components/MaskedInput';
 
 
 const DetalhesPessoa: React.FC = () => {
@@ -22,6 +23,8 @@ const DetalhesPessoa: React.FC = () => {
         informacao: '',
         descricao: '',
         data: '',
+        localizacao: '',
+        telefone: '',
         files: [] as File[]
     });
     const [enviando, setEnviando] = useState(false);
@@ -91,7 +94,33 @@ const DetalhesPessoa: React.FC = () => {
         const files = event.target.files;
         if (files) {
             const fileArray = Array.from(files);
+            
+            // Validar tipos de arquivo
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            const invalidFiles = fileArray.filter(file => !validTypes.includes(file.type));
+            
+            if (invalidFiles.length > 0) {
+                setErroFormulario('Apenas arquivos de imagem são permitidos (JPG, PNG, GIF, WebP)');
+                return;
+            }
+            
+            // Validar tamanho dos arquivos (máximo 5MB por arquivo)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const oversizedFiles = fileArray.filter(file => file.size > maxSize);
+            
+            if (oversizedFiles.length > 0) {
+                setErroFormulario('Cada arquivo deve ter no máximo 5MB');
+                return;
+            }
+            
+            // Validar quantidade de arquivos (máximo 5)
+            if (fileArray.length > 5) {
+                setErroFormulario('Máximo de 5 arquivos por envio');
+                return;
+            }
+            
             handleInputChange('files', fileArray);
+            setErroFormulario(null);
         }
     }, [handleInputChange]);
 
@@ -118,6 +147,11 @@ const DetalhesPessoa: React.FC = () => {
             setErroFormulario('Por favor, selecione a data da visualização.');
             return;
         }
+        
+        if (!formulario.localizacao.trim()) {
+            setErroFormulario('Por favor, informe a localização onde a pessoa foi avistada.');
+            return;
+        }
 
         try {
             setEnviando(true);
@@ -125,6 +159,8 @@ const DetalhesPessoa: React.FC = () => {
                 informacao: formulario.informacao.trim(),
                 descricao: formulario.descricao.trim(),
                 data: formulario.data,
+                localizacao: formulario.localizacao.trim(),
+                telefone: formulario.telefone.trim(),
                 files: formulario.files
             });
             
@@ -132,6 +168,8 @@ const DetalhesPessoa: React.FC = () => {
                 informacao: '',
                 descricao: '',
                 data: '',
+                localizacao: '',
+                telefone: '',
                 files: []
             });
             setEnviarInformacoes(false);
@@ -323,12 +361,38 @@ const DetalhesPessoa: React.FC = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Data da visualização *
                                 </label>
-                                <CustomInput 
-                                    type="date"
+                                <MaskedInput 
+                                    mask="99/99/9999"
+                                    placeholder="DD/MM/AAAA"
                                     value={formulario.data}
                                     onChange={(e) => handleInputChange('data', e.target.value)}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Localização onde foi avistado(a) *
+                                </label>
+                                <CustomInput 
+                                    type="text"
+                                    value={formulario.localizacao}
+                                    onChange={(e) => handleInputChange('localizacao', e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ex: Rua das Flores, 123, Centro, Cuiabá-MT"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Telefone para contato (opcional)
+                                </label>
+                                <MaskedInput 
+                                    mask="(99) 99999-9999"
+                                    placeholder="(XX) XXXXX-XXXX"
+                                    value={formulario.telefone}
+                                    onChange={(e) => handleInputChange('telefone', e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
@@ -338,10 +402,36 @@ const DetalhesPessoa: React.FC = () => {
                                 <input 
                                     type="file"
                                     multiple
-                                    accept="image/*"
+                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                     onChange={handleFileChange}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Máximo 5 arquivos, 5MB cada. Formatos: JPG, PNG, GIF, WebP
+                                </p>
+                                
+                                {formulario.files.length > 0 && (
+                                    <div className="mt-3">
+                                        <p className="text-sm font-medium text-gray-700 mb-2">
+                                            Arquivos selecionados ({formulario.files.length}):
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {formulario.files.map((file, index) => (
+                                                <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                                    </svg>
+                                                    <span className="text-xs text-gray-600 truncate">
+                                                        {file.name}
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        ({(file.size / 1024 / 1024).toFixed(1)}MB)
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <CustomButton 

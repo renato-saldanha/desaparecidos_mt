@@ -6,6 +6,7 @@ import { TypeDropDownMenuItem } from '../../types';
 import CustomInput from '@/Components/CustomInput';
 import CustomButton from '@/Components/CustomButton';
 import CardTotal from '@/Components/CardTotal';
+import MaskedInput from '@/Components/MaskedInput';
 
 import { buscarEstatisticas } from '@/services/apiService';
 import { EstatisticasDTO, FiltrosDTO } from '@/interfaces';
@@ -129,16 +130,16 @@ class Main extends React.Component<object, MainState> {
                                 onChange={e => this.handleFiltrosChange('nome', e.target.value)}
                             />
                             <div className='flex justify-evenly space-x-2'>
-                                <CustomInput 
-                                    type="number" 
+                                <MaskedInput 
+                                    mask="99"
                                     placeholder="Idade inicial"
-                                    value={this.state.filtrosTemporarios.idadeInicial}
+                                    value={this.state.filtrosTemporarios.idadeInicial || ''}
                                     onChange={e => this.handleFiltrosChange('idadeInicial', parseInt(e.target.value) || 0)}
                                 />
-                                <CustomInput 
-                                    type="number" 
+                                <MaskedInput 
+                                    mask="99"
                                     placeholder="Idade final"
-                                    value={this.state.filtrosTemporarios.idadeFinal}
+                                    value={this.state.filtrosTemporarios.idadeFinal || ''}
                                     onChange={e => this.handleFiltrosChange('idadeFinal', parseInt(e.target.value) || 0)}
                                 />
                             </div>

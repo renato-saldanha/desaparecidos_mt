@@ -16,7 +16,9 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 - ✅ **Paginação** - Navegação eficiente entre registros
 - ✅ **Detalhamento** - Página completa com informações da pessoa
 - ✅ **Envio de Informações** - Formulário para cidadãos reportarem avistamentos
-- ✅ **Upload de Fotos** - Anexar imagens como evidência
+- ✅ **Upload de Fotos** - Anexar imagens como evidência com validação
+- ✅ **Máscaras de Entrada** - Formatação automática para datas e telefones
+- ✅ **Validação Avançada** - Controle de tipos, tamanhos e quantidade de arquivos
 - ✅ **Layout Responsivo** - Funciona em desktop, tablet e mobile
 - ✅ **API Integrada** - Consumo em tempo real da API oficial
 
@@ -28,6 +30,7 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 - **Tailwind CSS 4.0** - Framework CSS utilitário
 - **Headless UI** - Componentes acessíveis
 - **Axios** - Cliente HTTP
+- **React Input Mask** - Máscaras de entrada para formulários
 
 ### **Backend/API:**
 - **API Oficial** - https://abitus-api.geia.vip/swagger-ui/index.html
@@ -86,7 +89,7 @@ yarn dev
 # Ou com npm
 npm run docker:dev
 ```
-
+DOCKER
 #### **Produção:**
 ```bash
 # Usar script
@@ -123,6 +126,7 @@ src/
 │   ├── CustomButton/    # Botão personalizado
 │   ├── CustomInput/     # Input personalizado
 │   ├── DropDown/        # Dropdown com Headless UI
+│   ├── MaskedInput/     # Input com máscaras de formatação
 │   └── Paginacao/       # Componente de paginação
 ├── hooks/               # Custom hooks
 │   └── useWindowSize.ts # Hook para responsividade
@@ -200,8 +204,38 @@ GET /pessoas/{id}
 
 ### **Envio de Informações:**
 ```http
-POST /ocorrencias/informacoes-desaparecido?informacao=...&descricao=...&data=...&ocoId=...
+POST /ocorrencias/informacoes-desaparecido?informacao=...&descricao=...&data=...&localizacao=...&telefone=...&ocoId=...
 ```
+
+**Parâmetros:**
+- `informacao` - Descrição do avistamento (obrigatório)
+- `descricao` - Descrição do anexo (obrigatório)
+- `data` - Data do avistamento no formato DD/MM/AAAA (obrigatório)
+- `localizacao` - Local onde a pessoa foi avistada (obrigatório)
+- `telefone` - Telefone para contato no formato (XX) XXXXX-XXXX (opcional)
+- `ocoId` - ID da ocorrência (obrigatório)
+- `anexos` - Arquivos de imagem (opcional, máximo 5 arquivos, 5MB cada)
+
+## 🆕 Funcionalidades Implementadas
+
+### **Máscaras de Entrada:**
+- **Data:** Formato automático `DD/MM/AAAA` no formulário de envio
+- **Telefone:** Formato automático `(XX) XXXXX-XXXX` para contato
+- **Idade:** Máscara `99` nos campos de idade inicial/final
+- **Biblioteca:** React Input Mask para formatação em tempo real
+
+### **Validação Avançada de Arquivos:**
+- **Tipos permitidos:** JPG, PNG, GIF, WebP
+- **Tamanho máximo:** 5MB por arquivo
+- **Quantidade máxima:** 5 arquivos por envio
+- **Preview:** Lista dos arquivos selecionados com nome e tamanho
+- **Mensagens de erro:** Específicas para cada tipo de validação
+
+### **Formulário Melhorado:**
+- **Campo de localização:** Obrigatório para indicar onde a pessoa foi avistada
+- **Campo de telefone:** Opcional para contato
+- **Validação em tempo real:** Erros mostrados imediatamente
+- **Interface responsiva:** Mantida em todos os dispositivos
 
 ## 🧪 Testes
 
@@ -210,12 +244,9 @@ POST /ocorrencias/informacoes-desaparecido?informacao=...&descricao=...&data=...
 2. **Paginação:** Navegue entre páginas
 3. **Detalhes:** Clique em uma pessoa
 4. **Formulário:** Envie informações com fotos
-5. **Responsividade:** Teste em diferentes tamanhos
-
-### **Health Check:**
-```bash
-curl http://localhost:3000/api/hello
-```
+5. **Máscaras:** Teste formatação automática de datas e telefones
+6. **Validação:** Teste upload de arquivos com diferentes tipos e tamanhos
+7. **Responsividade:** Teste em diferentes tamanhos
 
 ## 🐛 Troubleshooting
 
@@ -256,6 +287,9 @@ docker system prune -f
 - ✅ **Build otimizado** com Next.js
 - ✅ **Imagens otimizadas** com next/image
 - ✅ **CSS purging** com Tailwind
+- ✅ **Máscaras de entrada** para melhor UX
+- ✅ **Validação em tempo real** de formulários
+- ✅ **Preview de arquivos** antes do upload
 
 ### **Métricas:**
 - **First Contentful Paint:** < 1.5s
@@ -268,6 +302,8 @@ docker system prune -f
 - ✅ **Headers de segurança** no Nginx
 - ✅ **Validação de entrada** nos formulários
 - ✅ **Sanitização** de dados
+- ✅ **Validação de arquivos** (tipo, tamanho, quantidade)
+- ✅ **Máscaras de entrada** para prevenir dados malformados
 - ✅ **HTTPS** em produção
 - ✅ **CSP** (Content Security Policy)
 
@@ -277,7 +313,7 @@ Este projeto foi desenvolvido para a **Polícia Civil de Mato Grosso** como part
 
 **Nome:** Renato Luan Almeida Saldanha  
 **Email:** ranalisesaldanha@gmail.com
-**Data:** 07/09/2025
+**Data:** 08/09/2025 (Atualizado com novas funcionalidades)
 **LinkedIn:** https://www.linkedin.com/in/renato-saldanha-a318067b/
 **GitHub:** https://github.com/renato-saldanha
 
