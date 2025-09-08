@@ -7,7 +7,7 @@ interface CustomButtonProps {
 
 const CustomButton: React.FC<ButtonHTMLAttributes<HTMLButtonElement> & CustomButtonProps> = (props) => {
     return (
-        <button className={`w-full ${props.cor} text-white p-2 rounded-md text-sm font-bold
+        <button className={`w-full ${props.cor} text-white p-2 rounded-md text-sm font-bold cursor-pointer
                             sm:text-md 
                             md:text-lg 
                             lg:text-xl 

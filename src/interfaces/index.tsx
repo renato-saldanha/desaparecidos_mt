@@ -35,6 +35,13 @@ export interface OcorrenciaDTO {
     ocoId: number;
 }
 
+export interface OcorrenciaInformacaoDTO{
+    ocoId: number;
+    informacao:	string;
+    data: string;
+    i: number;
+    anexos:	[string];
+    }
 export interface OcorrenciaEntrevDesapDTO {
     id?: number;
     observacoes?: string;

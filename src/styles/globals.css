@@ -5,11 +5,15 @@
   --foreground: #171717;
   --amarelo: #c2c521;
   --vermelho: #e75353;
+  --azul: #2432f0;
+  --cinza: #adacac;
 }
 
 @theme inline {
   --color-vermelho: var(--vermelho);
   --color-amarelo: var(--amarelo);  
+  --color-azul: var(--azul);
+  --color-cinza: var(--cinza);
 }
 
 @media (prefers-color-scheme: dark) {

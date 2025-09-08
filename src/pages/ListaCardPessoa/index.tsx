@@ -3,25 +3,20 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 
 import { BuscaPessoasResponse, FiltrosDTO, PessoaDTO } from '@/interfaces';
-import { buscarPessoas } from '@/services/apiService';
-import { useWindowSize } from '@/services/windowSize';
 import Paginacao from '@/Components/Paginacao';
 import CardPessoa from '@/Components/CardPessoa';
 
+import { buscarPessoas } from '@/services/apiService';
+import { useWindowSize } from '@/hooks/useWindowSize';
+
 interface ListaCardPessoaProps {
     filtros: FiltrosDTO;
-    onFiltrosChange: (filtros: FiltrosDTO) => void;
-    onLimparFiltros: () => void;
-    onBuscar: () => void;
 }
 
 const ListaCardPessoa: React.FC<ListaCardPessoaProps> = ({ 
-    filtros, 
-    onFiltrosChange, 
-    onLimparFiltros, 
-    onBuscar 
+    filtros
 }) => {
-    const { width, height } = useWindowSize();
+    const { width } = useWindowSize();
     const router = useRouter();
 
     const [pessoas, setPessoas] = useState<PessoaDTO[]>([]);
@@ -32,48 +27,42 @@ const ListaCardPessoa: React.FC<ListaCardPessoaProps> = ({
 
     const TAMANHO_PAGINA = 10;
     
-    const getColunasPorBreakpoint = () => ({
-        tablet: 2,    
-        desktop: 5    
-    });
+    const getColunasPorLargura = () => {
+        if (width < 640) return 1;      // Mobile
+        if (width < 1024) return 2;     // Tablet
+        return 5;                       // Desktop
+    };
 
-    const { tablet, desktop } = getColunasPorBreakpoint();
-
-    const pessoasAgrupadasTablet = useMemo(() => {
+    const colunasAtuais = getColunasPorLargura();
+    
+    console.log('Largura da tela:', width, 'Colunas:', colunasAtuais);
+    
+    const pessoasAgrupadas = useMemo(() => {
         try {
             const grupos = [];
-            for (let i = 0; i < pessoas.length; i += tablet) {
-                grupos.push(pessoas.slice(i, i + tablet));
+            for (let i = 0; i < pessoas.length; i += colunasAtuais) {
+                grupos.push(pessoas.slice(i, i + colunasAtuais));
             }
             return grupos;
         } catch (error) {
-            console.error('Erro ao agrupar pessoas tablet:', error);
+            console.error('Erro ao agrupar pessoas:', error);
             return [];
         } 
-    }, [pessoas, tablet]);
-
-    const pessoasAgrupadasDesktop = useMemo(() => {
-        try {
-            const grupos = [];
-            for (let i = 0; i < pessoas.length; i += desktop) {
-                grupos.push(pessoas.slice(i, i + desktop));
-            }
-            return grupos;
-        } catch (error) {
-            console.error('Erro ao agrupar pessoas desktop:', error);
-            return [];
-        } 
-    }, [pessoas, desktop]);
+    }, [pessoas, colunasAtuais]);
 
     useEffect(() => {
         const carregarPessoas = async () => {
             try {
                 setCarregando(true);
+                console.log('Carregando página:', paginaAtual, 'Filtros:', filtros);
+                
                 const response: BuscaPessoasResponse = await buscarPessoas(
                     paginaAtual - 1, 
                     TAMANHO_PAGINA, 
                     filtros
                 );
+                
+                console.log('Resposta da API:', response);
                 
                 setPessoas(response.content);
                 setTotalPaginas(response.totalPages);
@@ -90,29 +79,97 @@ const ListaCardPessoa: React.FC<ListaCardPessoaProps> = ({
     }, [paginaAtual, filtros]);
 
     const handlePageChange = (novaPagina: number) => {
+        console.log('Mudando para página:', novaPagina);
         setPaginaAtual(novaPagina);
     };   
 
     const verDetalhes = (id: number) => {
-        router.push(`/detalhes/${id}`);
+        router.push(`/DetalhesPessoa/${id}`);
     };
 
-    // Função para quando os filtros mudam (chama o callback do pai)
-    const handleFiltrosChange = (novosFiltros: FiltrosDTO) => {
-        setPaginaAtual(1); // Reset para primeira página
-        onFiltrosChange(novosFiltros);
-    };
-
-    // Função para limpar filtros (chama o callback do pai)
-    const handleLimparFiltros = () => {
-        setPaginaAtual(1); // Reset para primeira página
-        onLimparFiltros();
-    };
-
-    // Função para buscar (chama o callback do pai)
-    const handleBuscar = () => {
-        setPaginaAtual(1); // Reset para primeira página
-        onBuscar();
+    const renderLayout = () => {
+        if (pessoas.length <= 5) {
+            return (
+                <div className="space-y-4">
+                    {pessoas.map((pessoa) => (
+                        <div 
+                            key={pessoa.id}
+                            onClick={() => verDetalhes(pessoa.id)}
+                            className="w-full cursor-pointer hover:shadow-lg transition-shadow"
+                        >
+                            <CardPessoa pessoa={pessoa} />
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        if (width < 640) {
+            return (
+                <div className="space-y-4">
+                    {pessoas.map((pessoa) => (
+                        <div 
+                            key={pessoa.id}
+                            onClick={() => verDetalhes(pessoa.id)}
+                            className="w-full cursor-pointer hover:shadow-lg transition-shadow"
+                        >
+                            <CardPessoa pessoa={pessoa} />
+                        </div>
+                    ))}
+                </div>
+            );
+        } else if (width < 1024) {
+            return (
+                <div className="grid grid-cols-2 gap-4">
+                    {pessoasAgrupadas.map((grupo, index) => (
+                        <div key={index} className="contents">
+                            {grupo.map((pessoa) => (
+                                <div 
+                                    key={pessoa.id}
+                                    onClick={() => verDetalhes(pessoa.id)}
+                                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                                >
+                                    <CardPessoa pessoa={pessoa} />
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        } else {
+            return (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {pessoasAgrupadas.map((grupo, index) => (
+                                <tr key={index}>
+                                    {[...Array(colunasAtuais)].map((_, colIndex) => {
+                                        const pessoa = grupo[colIndex];
+                                        return (
+                                            <td 
+                                                key={colIndex} 
+                                                className="px-2 py-4 whitespace-nowrap border-r border-gray-200 last:border-r-0"
+                                            >
+                                                {pessoa ? (
+                                                    <div 
+                                                        onClick={() => verDetalhes(pessoa.id)}
+                                                        className="cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors"
+                                                    >
+                                                        <CardPessoa pessoa={pessoa} />
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-2 h-32">
+                                                    </div>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
     };
 
     return (
@@ -137,62 +194,7 @@ const ListaCardPessoa: React.FC<ListaCardPessoaProps> = ({
                 </div>
             )}
 
-            {!carregando && pessoas.length > 0 && (
-                <>
-                    {/* TABLET: 2 colunas (640px - 1024px) */}
-                    <div className="md:block">
-                        <div className="grid grid-cols-2 gap-4">
-                            {pessoasAgrupadasTablet.map((grupoPessoas, grupoIndex) => (
-                                <div key={grupoIndex} className="contents">
-                                    {grupoPessoas.map((pessoa) => (
-                                        <div 
-                                            key={pessoa.id}
-                                            onClick={() => verDetalhes(pessoa.id)}
-                                            className="cursor-pointer"
-                                        >
-                                            <CardPessoa pessoa={pessoa} />
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* DESKTOP: 5 colunas (>= 1024px) */}
-                    <div className="lg:hidden xl:block bg-white rounded-lg shadow-md overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <tbody className="bg-white divide-y divide-gray-200">                            
-                                {pessoasAgrupadasDesktop.map((grupoPessoas, grupoIndex) => (
-                                    <tr key={grupoIndex}>
-                                        {[...Array(desktop)].map((_, colunaIndex) => {
-                                            const pessoa = grupoPessoas[colunaIndex];
-                                            return (
-                                                <td 
-                                                    key={colunaIndex} 
-                                                    className="px-2 py-4 whitespace-nowrap border-r border-gray-200 last:border-r-0"
-                                                >
-                                                    {pessoa ? (
-                                                        <div 
-                                                            onClick={() => verDetalhes(pessoa.id)}
-                                                            className="cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors"
-                                                        >
-                                                            <CardPessoa pessoa={pessoa} />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="p-2 h-32">
-                                                            
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
+            {!carregando && pessoas.length > 0 && renderLayout()}
 
             {totalPaginas > 1 && (
                 <div className="mt-6">

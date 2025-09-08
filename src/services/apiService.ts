@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { PessoaDTO, EstatisticasDTO, BuscaPessoasResponse, PessoaDetalhes } from '../interfaces';
+import axios, { AxiosResponse } from 'axios';
+import { PessoaDTO, EstatisticasDTO, BuscaPessoasResponse, OcorrenciaInformacaoDTO } from '../interfaces';
 
 const API_BASE_URL = 'https://abitus-api.geia.vip/v1';
 
@@ -32,36 +32,53 @@ export const buscarEstatisticas = async (): Promise<EstatisticasDTO> => {
 
 export const buscarPessoas = async (
     pagina: number = 0,
-    tamanho: number = 10,
+    porPagina: number = 10,
     filtros?: {
         nome?: string;
-        idadeMin?: number;
-        idadeMax?: number;
+        idadeInicial?: number;
+        idadeFinal?: number;
         sexo?: string;
         status?: string;
     }
 ): Promise<BuscaPessoasResponse> => {
     try {
-        const params = new URLSearchParams({
-            page: pagina.toString(),
-            size: tamanho.toString()
-        });
+        const params = new URLSearchParams();
 
         if (filtros?.nome) params.append('nome', filtros.nome);
-        if (filtros?.idadeMin) params.append('idadeMin', filtros.idadeMin.toString());
-        if (filtros?.idadeMax) params.append('idadeMax', filtros.idadeMax.toString());
+        if (filtros?.idadeInicial && filtros.idadeInicial > 0) params.append('faixaIdadeInicial', filtros.idadeInicial.toString());
+        if (filtros?.idadeFinal && filtros.idadeFinal > 0) params.append('faixaIdadeFinal', filtros.idadeFinal.toString());
         if (filtros?.sexo) params.append('sexo', filtros.sexo);
         if (filtros?.status) params.append('status', filtros.status);
+        if (pagina && pagina > 0) params.append('pagina', pagina.toString());
+        if (porPagina && pagina > 0) params.append('porPagina', porPagina.toString());
 
-        const response = await api.get(`/pessoas/aberto?${params.toString()}`);
-        return response.data;
+        let response: AxiosResponse<BuscaPessoasResponse>;
+        if (params.toString() !== '') {
+            response = await api.get(`/pessoas/aberto/filtro${'?'+params.toString()}`);
+        } else {
+            response = await api.get(`/pessoas/aberto/filtro`);
+        }
+        
+        if (response) {
+            return response.data;
+        } else {
+            return {
+                content: [],
+                totalElements: 0,
+                totalPages: 0,
+                size: 0,
+                number: 0,
+                first: true,
+                last: true
+            };
+        }        
     } catch (error) {
         console.error('Erro ao buscar pessoas:', error);
         throw new Error('Erro ao buscar pessoas');
     }
 };
 
-export const buscarDetalhesPessoa = async (id: number): Promise<PessoaDetalhes> => {
+export const buscarDetalhesPessoa = async (id: number): Promise<PessoaDTO> => {
     try {
         const response = await api.get(`/pessoas/${id}`);
         return response.data;
@@ -81,45 +98,44 @@ export const buscarPessoaDTO = async (id: number): Promise<PessoaDTO> => {
     }
 };
 
-export const enviarInformacoes = async (
-    pessoaId: number,
+export const enviarInformacoesAPI = async (
+    ocoId: number,
     informacoes: {
-        observacoes: string;
-        localizacao?: string;
-        dataAvistamento?: string;
-        contato?: string;
-        fotos?: File[];
+        informacao: string; 
+        descricao: string;  
+        data: string;       
+        files?: File[];     
     }
 ): Promise<void> => {
     try {
-        const formData = new FormData();
+        const params = new URLSearchParams();
+        params.append('informacao', informacoes.informacao);
+        params.append('descricao', informacoes.descricao);
+        params.append('data', informacoes.data);
+        params.append('ocoId', ocoId.toString());
+
+        let formData: FormData | null = null;
         
-        formData.append('pessoaId', pessoaId.toString());
-        formData.append('observacoes', informacoes.observacoes);
-        
-        if (informacoes.localizacao) {
-            formData.append('localizacao', informacoes.localizacao);
-        }
-        
-        if (informacoes.dataAvistamento) {
-            formData.append('dataAvistamento', informacoes.dataAvistamento);
-        }
-        
-        if (informacoes.contato) {
-            formData.append('contato', informacoes.contato);
-        }
-        
-        if (informacoes.fotos && informacoes.fotos.length > 0) {
-            informacoes.fotos.forEach((foto, index) => {
-                formData.append(`fotos[${index}]`, foto);
+        if (informacoes.files && informacoes.files.length > 0) {
+            formData = new FormData();
+
+            params.forEach((value, key) => {
+                formData!.append(key, value);
+            });
+            informacoes.files.forEach((file) => {
+                formData!.append('anexos', file);
             });
         }
 
-        await api.post('/pessoas/informacoes', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
+        if (formData) {
+            await api.post(`/ocorrencias/informacoes-desaparecido?${params.toString()}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+        } else {
+            await api.post(`/ocorrencias/informacoes-desaparecido?${params.toString()}`);
+        }
     } catch (error) {
         console.error('Erro ao enviar informações:', error);
         throw new Error('Erro ao enviar informações');
@@ -151,4 +167,23 @@ export const buscarPessoasPorFiltros = async (filtros: {
     }
 };
 
+export const buscarOcorrencias = async (pessoa: PessoaDTO): Promise<OcorrenciaInformacaoDTO[]> => {
+    try {
+        const response = await api.get(`/ocorrencias/informacoes-desaparecido?ocorrenciaId=${pessoa.ultimaOcorrencia.ocoId}`);
+        if (response) {
+            return response.data;
+        } else {
+            return [{
+                ocoId: 0,
+                informacao: '',
+                data: '',
+                i: 0,
+                anexos: [''],
+            }];
+        } 
+    } catch (error) {
+        console.error('Erro ao buscar ocorrências:', error);
+        throw new Error('Erro ao buscar ocorrências');
+    }
+};
 export default api;

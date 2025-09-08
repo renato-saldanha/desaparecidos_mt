@@ -1,8 +1,7 @@
-// src/Components/CardPessoa/index.tsx
 import React from 'react';
 import Image from 'next/image';
 import { PessoaDTO } from '@/interfaces';
-import { pessoaLocalizada, formatarData, obterCorStatus, truncarNome } from '@/utils/pessoaUtils';
+import { pessoaLocalizada, obterCorStatus, truncarNome, obterDiasDesdeDesaparecimento } from '@/utils/pessoaUtils';
 
 interface CardPessoaProps {
     pessoa: PessoaDTO;
@@ -35,8 +34,8 @@ const CardPessoa: React.FC<CardPessoaProps> = ({ pessoa }) => {
                 <p>Sexo: {pessoa.sexo}</p>
                 <p className={`font-semibold ${corStatus} flex flex-row items-center justify-center`}>
                     {dataPessoaLocalizada? 
-                        'Encontrado em: ' + formatarData(pessoa.ultimaOcorrencia.dataLocalizacao) : 
-                        'Desaparecido em: ' + formatarData(pessoa.ultimaOcorrencia?.dtDesaparecimento)}
+                        'Encontrado!' : 
+                        obterDiasDesdeDesaparecimento(pessoa)}
                                       
                 </p>
                 

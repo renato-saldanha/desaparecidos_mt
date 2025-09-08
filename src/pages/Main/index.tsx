@@ -17,6 +17,7 @@ interface MainState {
     menuStatus: TypeDropDownMenuItem[];
     estatisticas: EstatisticasDTO;
     filtros: FiltrosDTO;
+    filtrosTemporarios: FiltrosDTO;
 }
  
 class Main extends React.Component<object, MainState> {
@@ -24,18 +25,25 @@ class Main extends React.Component<object, MainState> {
         super(props);
         this.state = { 
             menuSexo : [
-                { descricao: 'Masculino' },
-                { descricao: 'Feminino' } 
+                { descricao: 'MASCULINO' },
+                { descricao: 'FEMININO' } 
             ],
             menuStatus : [
-                { descricao: 'Desaparecido'},
-                { descricao: 'Encontrado' }
+                { descricao: 'DESAPARECIDO'},
+                { descricao: 'ENCONTRADO' }
             ],   
             estatisticas: {
                 quantPessoasDesaparecidas: 0,
                 quantPessoasEncontradas: 0
             },
             filtros: {
+                nome: '',
+                idadeInicial: 0,
+                idadeFinal: 0,
+                sexo: '',
+                status: ''
+            },
+            filtrosTemporarios: {
                 nome: '',
                 idadeInicial: 0,
                 idadeFinal: 0,
@@ -57,35 +65,35 @@ class Main extends React.Component<object, MainState> {
     };
 
     handleLimparFiltros = () => {
+        const filtrosVazios = {
+            nome: '',
+            idadeInicial: 0,
+            idadeFinal: 0,
+            sexo: '',
+            status: '',
+        };
+        
         this.setState({
-            filtros: {
-                nome: '',
-                idadeInicial: 0,
-                idadeFinal: 0,
-                sexo: '',
-                status: '',
-            },
+            filtros: filtrosVazios,
+            filtrosTemporarios: filtrosVazios,
         });
     };
 
-    handleFiltrosChange = (campo: string, valor: string) => {
+    handleFiltrosChange = (campo: string, valor: string | number) => {
         this.setState(prevState => ({
-            filtros: {
-                ...prevState.filtros,
+            filtrosTemporarios: {
+                ...prevState.filtrosTemporarios,
                 [campo]: valor,
             },
         }));
     };
 
     handleBuscar = () => {
-        
-    };
-
-    handleListaCardPessoa = (filtros: FiltrosDTO) => {
         this.setState({
-            filtros: filtros,
+            filtros: this.state.filtrosTemporarios
         });
     };
+
     
     render() { 
         return (  
@@ -117,23 +125,27 @@ class Main extends React.Component<object, MainState> {
                             <CustomInput 
                                 type="text" 
                                 placeholder="Digite o nome"
+                                value={this.state.filtrosTemporarios.nome}
                                 onChange={e => this.handleFiltrosChange('nome', e.target.value)}
                             />
                             <div className='flex justify-evenly space-x-2'>
                                 <CustomInput 
                                     type="number" 
                                     placeholder="Idade inicial"
-                                    onChange={e => this.handleFiltrosChange('idadeInicial', e.target.value)}
+                                    value={this.state.filtrosTemporarios.idadeInicial}
+                                    onChange={e => this.handleFiltrosChange('idadeInicial', parseInt(e.target.value) || 0)}
                                 />
                                 <CustomInput 
                                     type="number" 
                                     placeholder="Idade final"
-                                    onChange={e => this.handleFiltrosChange('idadeFinal', e.target.value)}
+                                    value={this.state.filtrosTemporarios.idadeFinal}
+                                    onChange={e => this.handleFiltrosChange('idadeFinal', parseInt(e.target.value) || 0)}
                                 />
                             </div>
                             <div className='flex justify-evenly space-x-2'>
                                 <DropDown 
-                                    titulo='Sexo' menus={this.state.menuSexo} 
+                                    titulo='Sexo' 
+                                    menus={this.state.menuSexo} 
                                     onSelect={item => this.handleFiltrosChange('sexo', item.descricao)} /> 
                                 <DropDown 
                                     titulo='Status' 
@@ -147,7 +159,8 @@ class Main extends React.Component<object, MainState> {
                                     onClick={this.handleLimparFiltros}/>
                                 <CustomButton 
                                     cor='bg-amarelo'
-                                    texto='Buscar'/>
+                                    texto='Buscar'
+                                    onClick={this.handleBuscar}/>
                             </div>                                    
                         </div>
                         
@@ -169,9 +182,6 @@ class Main extends React.Component<object, MainState> {
                 <div className='flex-1 bg-gray-400 px-9 py-4'>
                     <ListaCardPessoa 
                         filtros={this.state.filtros}
-                        onFiltrosChange={this.handleListaCardPessoa}
-                        onLimparFiltros={this.handleLimparFiltros}
-                        onBuscar={this.handleBuscar}
                     />
                 </div>
             </main>
