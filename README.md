@@ -17,8 +17,11 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 - ✅ **Detalhamento** - Página completa com informações da pessoa
 - ✅ **Envio de Informações** - Formulário para cidadãos reportarem avistamentos
 - ✅ **Upload de Fotos** - Anexar imagens como evidência com validação
-- ✅ **Máscaras de Entrada** - Formatação automática para datas e telefones
+- ✅ **Máscaras de Entrada** - Formatação automática para datas, telefones e idade
 - ✅ **Validação Avançada** - Controle de tipos, tamanhos e quantidade de arquivos
+- ✅ **Validação de Data** - Verificação completa de formato, mês, dia, ano e data real
+- ✅ **Teclado Numérico** - Automático para campos de data, telefone e idade
+- ✅ **Botão Inteligente** - Habilitado apenas com campos obrigatórios preenchidos
 - ✅ **Layout Responsivo** - Funciona em desktop, tablet e mobile
 - ✅ **API Integrada** - Consumo em tempo real da API oficial
 
@@ -30,7 +33,7 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 - **Tailwind CSS 4.0** - Framework CSS utilitário
 - **Headless UI** - Componentes acessíveis
 - **Axios** - Cliente HTTP
-- **React Input Mask** - Máscaras de entrada para formulários
+- **@react-input/mask** - Máscaras de entrada para formulários
 
 ### **Backend/API:**
 - **API Oficial** - https://abitus-api.geia.vip/swagger-ui/index.html
@@ -219,22 +222,24 @@ POST /ocorrencias/informacoes-desaparecido?informacao=...&descricao=...&data=...
 ## 🆕 Funcionalidades Implementadas
 
 ### **Máscaras de Entrada:**
-- **Data:** Formato automático `DD/MM/AAAA` no formulário de envio
+- **Data:** Formato automático `DD/MM/AAAA` com validação completa
 - **Telefone:** Formato automático `(XX) XXXXX-XXXX` para contato
 - **Idade:** Máscara `99` nos campos de idade inicial/final
-- **Biblioteca:** React Input Mask para formatação em tempo real
+- **Biblioteca:** @react-input/mask para formatação em tempo real
+- **Teclado numérico:** Automático para campos de data, telefone e idade
 
-### **Validação Avançada de Arquivos:**
-- **Tipos permitidos:** JPG, PNG, GIF, WebP
-- **Tamanho máximo:** 5MB por arquivo
-- **Quantidade máxima:** 5 arquivos por envio
-- **Preview:** Lista dos arquivos selecionados com nome e tamanho
-- **Mensagens de erro:** Específicas para cada tipo de validação
+### **Validação Avançada:**
+- **Data:** Verificação de formato, mês (01-12), dia (01-31), ano (1900-atual), data real e não futura
+- **Arquivos:** Tipos permitidos (JPG, PNG, GIF, WebP), tamanho máximo 5MB, máximo 5 arquivos
+- **Formulário:** Botão habilitado apenas com campos obrigatórios preenchidos
+- **Tempo real:** Erros mostrados imediatamente com mensagens específicas
 
 ### **Formulário Melhorado:**
 - **Campo de localização:** Obrigatório para indicar onde a pessoa foi avistada
 - **Campo de telefone:** Opcional para contato
-- **Validação em tempo real:** Erros mostrados imediatamente
+- **Scroll automático:** Para o campo de informações ao abrir formulário
+- **Foco inteligente:** Condicional para mobile/desktop
+- **Limpeza automática:** Formulário resetado após envio bem-sucedido
 - **Interface responsiva:** Mantida em todos os dispositivos
 
 ## 🧪 Testes
@@ -287,9 +292,12 @@ docker system prune -f
 - ✅ **Build otimizado** com Next.js
 - ✅ **Imagens otimizadas** com next/image
 - ✅ **CSS purging** com Tailwind
-- ✅ **Máscaras de entrada** para melhor UX
+- ✅ **Máscaras de entrada** com @react-input/mask
 - ✅ **Validação em tempo real** de formulários
 - ✅ **Preview de arquivos** antes do upload
+- ✅ **Validação de data** robusta e reutilizável
+- ✅ **Teclado numérico** automático
+- ✅ **Formato híbrido** da API otimizado
 
 ### **Métricas:**
 - **First Contentful Paint:** < 1.5s
@@ -303,7 +311,9 @@ docker system prune -f
 - ✅ **Validação de entrada** nos formulários
 - ✅ **Sanitização** de dados
 - ✅ **Validação de arquivos** (tipo, tamanho, quantidade)
+- ✅ **Validação de data** robusta (formato, mês, dia, ano, data real)
 - ✅ **Máscaras de entrada** para prevenir dados malformados
+- ✅ **Teclado numérico** para campos sensíveis
 - ✅ **HTTPS** em produção
 - ✅ **CSP** (Content Security Policy)
 
@@ -313,7 +323,7 @@ Este projeto foi desenvolvido para a **Polícia Civil de Mato Grosso** como part
 
 **Nome:** Renato Luan Almeida Saldanha  
 **Email:** ranalisesaldanha@gmail.com
-**Data:** 08/09/2025 (Atualizado com novas funcionalidades)
+**Data:** 08/09/2025 (Atualizado com validações avançadas e correções na API)
 **LinkedIn:** https://www.linkedin.com/in/renato-saldanha-a318067b/
 **GitHub:** https://github.com/renato-saldanha
 
