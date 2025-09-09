@@ -36,7 +36,6 @@ export const useWindowSize = (options: UseWindowSizeOptions = {}): WindowSize =>
             height: window.innerHeight,
         });
 
-        // Reset flag after a short delay
         setTimeout(() => {
             isResizingRef.current = false;
         }, 50);
@@ -53,10 +52,8 @@ export const useWindowSize = (options: UseWindowSizeOptions = {}): WindowSize =>
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        // Definir tamanho inicial imediatamente
         handleResize();
 
-        // Usar passive listener para melhor performance
         window.addEventListener('resize', debouncedResize, { passive: true });
         
         return () => {

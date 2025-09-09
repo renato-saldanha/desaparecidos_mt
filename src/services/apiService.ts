@@ -110,10 +110,14 @@ export const enviarInformacoesAPI = async (
     }
 ): Promise<void> => {
     try {
+        console.log('Enviando dados:', { ocoId, informacoes });
+        
         const params = new URLSearchParams();
         params.append('informacao', informacoes.informacao);
         params.append('descricao', informacoes.descricao);
-        params.append('data', informacoes.data);
+        
+        const dataFormatada = informacoes.data ? informacoes.data.split('/').reverse().join('-') : '';
+        params.append('data', dataFormatada);
         params.append('ocoId', ocoId.toString());
         
         if (informacoes.localizacao) {
@@ -123,20 +127,12 @@ export const enviarInformacoesAPI = async (
             params.append('telefone', informacoes.telefone);
         }
 
-        let formData: FormData | null = null;
-        
         if (informacoes.files && informacoes.files.length > 0) {
-            formData = new FormData();
-
-            params.forEach((value, key) => {
-                formData!.append(key, value);
-            });
+            const formData = new FormData();
             informacoes.files.forEach((file) => {
-                formData!.append('anexos', file);
+                formData.append('files', file);
             });
-        }
 
-        if (formData) {
             await api.post(`/ocorrencias/informacoes-desaparecido?${params.toString()}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'

@@ -59,3 +59,41 @@ export const obterDiasDesdeDesaparecimento = (pessoa: PessoaDTO): string => {
 
     return `${texto} há ${diasRestantes.toString()} dias`;
 };
+
+export const validarData = (data: string): string | null => {
+    const dataRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = data.match(dataRegex);
+    
+    if (data.length === 10 && match) {
+        const [, dia, mes, ano] = match;
+        const diaNum = parseInt(dia, 10);
+        const mesNum = parseInt(mes, 10);
+        const anoNum = parseInt(ano, 10);
+        
+        const dataAtual = new Date();
+        const anoAtual = dataAtual.getFullYear();
+        
+        if (mesNum < 1 || mesNum > 12) {
+            return 'Mês inválido. Use um valor entre 01 e 12.';
+        }
+        
+        if (diaNum < 1 || diaNum > 31) {
+            return 'Dia inválido. Use um valor entre 01 e 31.';
+        }
+        
+        if (anoNum < 1900 || anoNum > anoAtual) {
+            return `Ano inválido. Use um valor entre 1900 e ${anoAtual}.`;
+        }
+        
+        const dataTeste = new Date(anoNum, mesNum - 1, diaNum);
+        if (dataTeste.getDate() !== diaNum || dataTeste.getMonth() !== mesNum - 1 || dataTeste.getFullYear() !== anoNum) {
+            return 'Data inválida. Verifique se o dia existe no mês informado.';
+        }
+        
+        if (dataTeste > dataAtual) {
+            return 'A data não pode ser futura.';
+        }
+    }
+    
+    return null;
+};

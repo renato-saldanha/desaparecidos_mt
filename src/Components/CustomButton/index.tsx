@@ -6,14 +6,17 @@ interface CustomButtonProps {
 }
 
 const CustomButton: React.FC<ButtonHTMLAttributes<HTMLButtonElement> & CustomButtonProps> = (props) => {
+    const { disabled, cor, ...restProps } = props;
+    
     return (
-        <button className={`w-full ${props.cor} text-white p-2 rounded-md text-sm font-bold cursor-pointer
+        <button className={`w-full ${disabled ? 'bg-gray-400 cursor-not-allowed' : cor} text-white p-2 rounded-md text-sm font-bold ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
                             sm:text-md 
                             md:text-lg 
                             lg:text-xl 
                             xl:text-2xl 
                             2xl:text-3xl `}
-            {...props}            
+            disabled={disabled}
+            {...restProps}            
         >
             {props.texto || 'Buscar'}
         </button>

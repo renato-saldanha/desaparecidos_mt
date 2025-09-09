@@ -4,16 +4,31 @@
   --background: #ffffff;
   --foreground: #171717;
   --amarelo: #c2c521;
-  --vermelho: #e75353;
+  --vermelho: #f75050;
   --azul: #2432f0;
   --cinza: #adacac;
+  --vermelho-alerta: #f00707;
+  --branco: #ffffff;
+  --preto: #000000;
+  --verde-sucesso: #10b981;
+  --status-desaparecido: #dc2626;
+  --status-encontrado: #059669;
 }
 
-@theme inline {
+@theme {
   --color-vermelho: var(--vermelho);
   --color-amarelo: var(--amarelo);  
   --color-azul: var(--azul);
   --color-cinza: var(--cinza);
+  --color-vermelho-alerta: var(--vermelho-alerta);
+  --color-branco: var(--branco);
+  --color-preto: var(--preto);
+  --color-verde-sucesso: var(--verde-sucesso);
+  --color-status-desaparecido: var(--status-desaparecido);
+  --color-status-encontrado: var(--status-encontrado);
+  
+  --shadow-policia: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-policia-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {

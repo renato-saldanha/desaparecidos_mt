@@ -6,7 +6,7 @@ import { TypeDropDownMenuItem } from '../../types';
 import CustomInput from '@/Components/CustomInput';
 import CustomButton from '@/Components/CustomButton';
 import CardTotal from '@/Components/CardTotal';
-import MaskedInput from '@/Components/MaskedInput';
+import { InputMask } from '@react-input/mask';
 
 import { buscarEstatisticas } from '@/services/apiService';
 import { EstatisticasDTO, FiltrosDTO } from '@/interfaces';
@@ -118,7 +118,7 @@ class Main extends React.Component<object, MainState> {
                                     sm:inset-y-20 sm:pl-10 sm:pr-20
                                     md:inset-y-25 md:pl-20 md:pr-10
                                     xl:inset-y-30 xl:pl-32 xl:pr-0'>
-                     <div className='container w-full flex justify-evenly '>
+                     <div className='container w-full flex justify-evenly text-preto'>
                         <div className="flex flex-col bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-xl w-60 
                                         sm:w-80 sm:p-2          
                                         md:w-100 md:p-3 md:mr-20
@@ -129,18 +129,18 @@ class Main extends React.Component<object, MainState> {
                                 value={this.state.filtrosTemporarios.nome}
                                 onChange={e => this.handleFiltrosChange('nome', e.target.value)}
                             />
-                            <div className='flex justify-evenly space-x-2'>
-                                <MaskedInput 
-                                    mask="99"
+                            <div className='flex justify-evenly space-x-2 py-1'>
+                                <CustomInput 
                                     placeholder="Idade inicial"
                                     value={this.state.filtrosTemporarios.idadeInicial || ''}
                                     onChange={e => this.handleFiltrosChange('idadeInicial', parseInt(e.target.value) || 0)}
+                                    inputMode="numeric"
                                 />
-                                <MaskedInput 
-                                    mask="99"
+                                <CustomInput 
                                     placeholder="Idade final"
                                     value={this.state.filtrosTemporarios.idadeFinal || ''}
                                     onChange={e => this.handleFiltrosChange('idadeFinal', parseInt(e.target.value) || 0)}
+                                    inputMode="numeric"
                                 />
                             </div>
                             <div className='flex justify-evenly space-x-2'>
@@ -153,7 +153,7 @@ class Main extends React.Component<object, MainState> {
                                     menus={this.state.menuStatus} 
                                     onSelect={item => this.handleFiltrosChange('status', item.descricao)} /> 
                             </div>
-                            <div className='flex justify-evenly space-x-2'>
+                            <div className='flex justify-evenly space-x-2 py-1'>
                                 <CustomButton 
                                     cor='bg-vermelho'
                                     texto='Limpar'

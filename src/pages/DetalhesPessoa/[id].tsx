@@ -4,10 +4,10 @@ import Image from 'next/image';
 
 import { buscarDetalhesPessoa, buscarOcorrencias, enviarInformacoesAPI } from '@/services/apiService';
 import { OcorrenciaInformacaoDTO, PessoaDTO } from '@/interfaces';
-import { pessoaLocalizada } from '@/utils/pessoaUtils';
+import { pessoaLocalizada, validarData } from '@/utils/pessoaUtils';
 import CustomInput from '@/Components/CustomInput';
 import CustomButton from '@/Components/CustomButton';
-import MaskedInput from '@/Components/MaskedInput';
+import { InputMask } from '@react-input/mask';
 
 
 const DetalhesPessoa: React.FC = () => {
@@ -73,18 +73,58 @@ const DetalhesPessoa: React.FC = () => {
     const abrirFormulario = useCallback(() => {
         setEnviarInformacoes(true);
         setErroFormulario(null);
-        // Focus com delay para garantir que o elemento esteja renderizado
+        
         setTimeout(() => {
-            edtInformacoesRef.current?.focus();
+            const inputElement = edtInformacoesRef.current;
+            if (inputElement) {
+                try {
+                    inputElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                    
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    
+                    if (isMobile) {
+                        setTimeout(() => {
+                            if (inputElement) {
+                                inputElement.click();
+                                inputElement.focus();
+                            }
+                        }, 300);
+                    } else {                    
+                        inputElement.focus();
+                    }
+                } catch (error) {
+                    console.warn('Erro ao focar no input:', error);
+                }
+            }
         }, 100);
     }, []);
 
+    const validarFormularioCompleto = useCallback(() => {
+        return formulario.informacao.trim() !== '' &&
+               formulario.descricao.trim() !== '' &&
+               formulario.data.trim() !== '' &&
+               formulario.localizacao.trim() !== '' &&
+               !erroFormulario;
+    }, [formulario, erroFormulario]);
+
     const handleInputChange = useCallback((campo: string, valor: string | File[]) => {
+        if (campo === 'data' && typeof valor === 'string') {
+            const erroValidacao = validarData(valor);
+            if (erroValidacao) {
+                setErroFormulario(erroValidacao);
+                return;
+            }
+        }
+        
         setFormulario(prev => ({
             ...prev,
             [campo]: valor
         }));
-        // Limpar erro quando usuário começar a digitar
+        
         if (erroFormulario) {
             setErroFormulario(null);
         }
@@ -95,7 +135,7 @@ const DetalhesPessoa: React.FC = () => {
         if (files) {
             const fileArray = Array.from(files);
             
-            // Validar tipos de arquivo
+            
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             const invalidFiles = fileArray.filter(file => !validTypes.includes(file.type));
             
@@ -104,7 +144,7 @@ const DetalhesPessoa: React.FC = () => {
                 return;
             }
             
-            // Validar tamanho dos arquivos (máximo 5MB por arquivo)
+            
             const maxSize = 5 * 1024 * 1024; // 5MB
             const oversizedFiles = fileArray.filter(file => file.size > maxSize);
             
@@ -113,7 +153,7 @@ const DetalhesPessoa: React.FC = () => {
                 return;
             }
             
-            // Validar quantidade de arquivos (máximo 5)
+            
             if (fileArray.length > 5) {
                 setErroFormulario('Máximo de 5 arquivos por envio');
                 return;
@@ -123,6 +163,17 @@ const DetalhesPessoa: React.FC = () => {
             setErroFormulario(null);
         }
     }, [handleInputChange]);
+
+    const limparFormulario = useCallback(() => {
+        setFormulario({
+            informacao: '',
+            descricao: '',
+            data: '',
+            localizacao: '',
+            telefone: '',
+            files: []
+        });
+    }, []);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -164,14 +215,7 @@ const DetalhesPessoa: React.FC = () => {
                 files: formulario.files
             });
             
-            setFormulario({
-                informacao: '',
-                descricao: '',
-                data: '',
-                localizacao: '',
-                telefone: '',
-                files: []
-            });
+            limparFormulario();
             setEnviarInformacoes(false);
             setErroFormulario(null);
             
@@ -184,9 +228,26 @@ const DetalhesPessoa: React.FC = () => {
                 document.body.removeChild(successMessage);
             }, 3000);
             
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Erro ao enviar informações:', error);
-            setErroFormulario('Erro ao enviar informações. Verifique sua conexão e tente novamente.');
+            
+            let mensagemErro = 'Erro ao enviar informações. Tente novamente.';
+            
+            if (error && typeof error === 'object') {
+                const axiosError = error as { response?: { status?: number }; code?: string; message?: string };
+                
+                if (axiosError.response?.status === 500) {
+                    mensagemErro = 'Erro interno do servidor. Tente novamente em alguns minutos.';
+                } else if (axiosError.response?.status === 400) {
+                    mensagemErro = 'Dados inválidos. Verifique os campos preenchidos.';
+                } else if (axiosError.code === 'NETWORK_ERROR' || !navigator.onLine) {
+                    mensagemErro = 'Sem conexão com a internet. Verifique sua rede.';
+                } else if (axiosError.message?.includes('timeout')) {
+                    mensagemErro = 'Tempo limite excedido. Tente novamente.';
+                }
+            }
+            
+            setErroFormulario(mensagemErro);
         } finally {
             setEnviando(false);
         }
@@ -267,7 +328,7 @@ const DetalhesPessoa: React.FC = () => {
 
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-4">Informações Pessoais</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-preto">Informações Pessoais</h2>
                             <div className="space-y-3">
                                 <div>
                                     <span className="font-medium text-gray-700">Nome:</span>
@@ -288,8 +349,8 @@ const DetalhesPessoa: React.FC = () => {
                         </div>
 
                         <div className="bg-white p-6 rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-4">Tem informações sobre esta pessoa?</h2> 
-                            <p className="text-gray-600 mb-4">
+                            <h2 className="text-xl font-semibold mb-4 text-preto">Tem informações sobre esta pessoa?</h2> 
+                            <p className="text-gray-600 mb-4 text-black">
                                 Se você tem informações sobre esta pessoa, clique no botão abaixo para enviar.
                             </p>
                             <CustomButton 
@@ -307,19 +368,23 @@ const DetalhesPessoa: React.FC = () => {
                     <div className="bg-white p-6 rounded-lg shadow mt-8">
                         <div className="flex justify-end mb-4">
                             <button 
-                                className="flex justify-center items-center cursor-pointer font-bold text-white bg-vermelho-alerta p-1 rounded-md w-8 h-8 hover:bg-red-700 transition-colors" 
-                                onClick={() => setEnviarInformacoes(false)}
+                                className="flex justify-center items-center cursor-pointer font-bold text-white  bg-vermelho-alerta p-1 rounded-md w-8 h-8 hover:bg-red-700 transition-colors" 
+                                onClick={() => {
+                                    setEnviarInformacoes(false);
+                                    setErroFormulario(null);
+                                    limparFormulario();
+                                }}
                             >
                                 X
                             </button>
                         </div>
-                        <h2 className="text-xl font-semibold mb-4">Enviar Informações</h2>
+                        <h2 className="text-xl font-semibold mb-4 text-preto">Enviar Informações</h2>
                         <p className="text-gray-600 mb-4">
                             Se você tem informações sobre esta pessoa, preencha o formulário abaixo.
                         </p>
                         
                         {erroFormulario && (
-                            <div className="mb-4 p-4 bg-red-50 border border-vermelho-alerta text-vermelho-alerta rounded-lg shadow-policia">
+                            <div className="mb-4 p-4 bg-red-50 border border-vermelho-alerta text-red-800 rounded-lg shadow-policia items-center justify-center">
                                 <div className="flex items-center">
                                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -339,7 +404,7 @@ const DetalhesPessoa: React.FC = () => {
                                     type="text"
                                     value={formulario.informacao}
                                     onChange={(e) => handleInputChange('informacao', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
                                     placeholder="Descreva onde e como você viu esta pessoa..."
                                     required
                                 />
@@ -352,7 +417,7 @@ const DetalhesPessoa: React.FC = () => {
                                     type="text"
                                     value={formulario.descricao}
                                     onChange={(e) => handleInputChange('descricao', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
                                     placeholder="Ex: Foto de João da Silva"
                                     required
                                 />
@@ -361,12 +426,15 @@ const DetalhesPessoa: React.FC = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Data da visualização *
                                 </label>
-                                <MaskedInput 
-                                    mask="99/99/9999"
+                                <InputMask 
+                                    mask="__/__/____"
+                                    replacement={{ _: /\d/ }}
+                                    type="text"
                                     placeholder="DD/MM/AAAA"
                                     value={formulario.data}
                                     onChange={(e) => handleInputChange('data', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
+                                    inputMode="numeric"
                                     required
                                 />
                             </div>
@@ -378,7 +446,7 @@ const DetalhesPessoa: React.FC = () => {
                                     type="text"
                                     value={formulario.localizacao}
                                     onChange={(e) => handleInputChange('localizacao', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
                                     placeholder="Ex: Rua das Flores, 123, Centro, Cuiabá-MT"
                                     required
                                 />
@@ -387,12 +455,14 @@ const DetalhesPessoa: React.FC = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Telefone para contato (opcional)
                                 </label>
-                                <MaskedInput 
-                                    mask="(99) 99999-9999"
+                                <InputMask 
+                                    mask="(__) _____-____"
+                                    replacement={{ _: /\d/ }}
                                     placeholder="(XX) XXXXX-XXXX"
                                     value={formulario.telefone}
                                     onChange={(e) => handleInputChange('telefone', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
+                                    inputMode="tel"
                                 />
                             </div>
                             <div>
@@ -400,11 +470,12 @@ const DetalhesPessoa: React.FC = () => {
                                     Fotos (opcional)
                                 </label>
                                 <input 
+                                    key={`files-${formulario.files.length}`}
                                     type="file"
                                     multiple
                                     accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                     onChange={handleFileChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-preto"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
                                     Máximo 5 arquivos, 5MB cada. Formatos: JPG, PNG, GIF, WebP
@@ -435,19 +506,10 @@ const DetalhesPessoa: React.FC = () => {
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <CustomButton 
-                                    texto="Cancelar"
-                                    cor="bg-cinza"
-                                    type="button"
-                                    onClick={() => {
-                                        setEnviarInformacoes(false);
-                                        setErroFormulario(null);
-                                    }}
-                                />
-                                <CustomButton 
                                     texto={enviando ? "Enviando..." : "Enviar Informações"}
                                     cor="bg-azul"
                                     type="submit"
-                                    disabled={enviando}
+                                    disabled={enviando || !validarFormularioCompleto()}
                                 />
                             </div>
                         </form>
