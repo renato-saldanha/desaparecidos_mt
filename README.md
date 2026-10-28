@@ -1,6 +1,6 @@
 # 🚨 Sistema de Pessoas Desaparecidas - Polícia Civil MT
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.28-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-38B2AC)](https://tailwindcss.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)](https://www.docker.com/)
@@ -28,7 +28,7 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 ## 🛠️ Tecnologias Utilizadas
 
 ### **Frontend:**
-- **Next.js 15.5.2** - Framework React com SSR/SSG
+- **Next.js 15.5.28** - Framework React com SSR/SSG
 - **TypeScript 5.0** - Tipagem estática
 - **Tailwind CSS 4.0** - Framework CSS utilitário
 - **Headless UI** - Componentes acessíveis
@@ -79,6 +79,23 @@ yarn dev
 ### **4. Acessar a Aplicação:**
 - **URL:** http://localhost:3000
 - **API Health Check:** http://localhost:3000/api/hello
+
+## 🧪 Modo Demonstração (API fora do ar)
+
+A API oficial original (`https://abitus-api.geia.vip/v1`) saiu do ar e não há uma API pública equivalente. Por isso o projeto tem um **modo demonstração**, com uma API simulada dentro do próprio Next.js (`src/pages/api/mock`) e cerca de 30 registros **fictícios** (`src/mock/pessoas.ts`). Filtros e paginação funcionam sobre esses dados, e o envio de informações aceita arquivos sem gravar nada.
+
+O modo é ativado pela variável `NEXT_PUBLIC_API_URL=/api/mock`. Quando ela está ativa, a interface exibe a faixa "Modo demonstração: dados fictícios". Sem a variável, o app usa a URL oficial.
+
+Para rodar localmente em modo demo:
+```bash
+# Linux/Mac
+NEXT_PUBLIC_API_URL=/api/mock npm run dev
+
+# Windows (PowerShell)
+$env:NEXT_PUBLIC_API_URL="/api/mock"; npm run dev
+```
+
+Na Vercel, basta definir `NEXT_PUBLIC_API_URL=/api/mock` nas variáveis de ambiente do projeto e fazer um novo deploy.
 
 ## 🐳 Docker
 

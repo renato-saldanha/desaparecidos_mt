@@ -1,7 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 import { PessoaDTO, EstatisticasDTO, BuscaPessoasResponse, OcorrenciaInformacaoDTO } from '../interfaces';
 
-const API_BASE_URL = 'https://abitus-api.geia.vip/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://abitus-api.geia.vip/v1';
+
+export const MODO_DEMO = API_BASE_URL.startsWith('/api/mock');
 
 const api = axios.create({
     baseURL: API_BASE_URL,
