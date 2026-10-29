@@ -1,6 +1,6 @@
 # 🚨 Sistema de Pessoas Desaparecidas - Polícia Civil MT
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.28-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.4.3-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-38B2AC)](https://tailwindcss.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)](https://www.docker.com/)
@@ -28,7 +28,7 @@ Sistema web desenvolvido para a **Polícia Civil de Mato Grosso** que permite ao
 ## 🛠️ Tecnologias Utilizadas
 
 ### **Frontend:**
-- **Next.js 15.5.28** - Framework React com SSR/SSG
+- **Next.js 16.4.3** - Framework React com SSR/SSG
 - **TypeScript 5.0** - Tipagem estática
 - **Tailwind CSS 4.0** - Framework CSS utilitário
 - **Headless UI** - Componentes acessíveis
