@@ -95,6 +95,12 @@ class Main extends React.Component<object, MainState> {
         });
     };
 
+    handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            this.handleBuscar();
+        }
+    };
+
     
     render() { 
         return (  
@@ -128,18 +134,21 @@ class Main extends React.Component<object, MainState> {
                                 placeholder="Digite o nome"
                                 value={this.state.filtrosTemporarios.nome}
                                 onChange={e => this.handleFiltrosChange('nome', e.target.value)}
+                                onKeyDown={this.handleKeyDown}
                             />
                             <div className='flex justify-evenly space-x-2 py-1'>
                                 <CustomInput 
                                     placeholder="Idade inicial"
                                     value={this.state.filtrosTemporarios.idadeInicial || ''}
                                     onChange={e => this.handleFiltrosChange('idadeInicial', parseInt(e.target.value) || 0)}
+                                    onKeyDown={this.handleKeyDown}
                                     inputMode="numeric"
                                 />
                                 <CustomInput 
                                     placeholder="Idade final"
                                     value={this.state.filtrosTemporarios.idadeFinal || ''}
                                     onChange={e => this.handleFiltrosChange('idadeFinal', parseInt(e.target.value) || 0)}
+                                    onKeyDown={this.handleKeyDown}
                                     inputMode="numeric"
                                 />
                             </div>
